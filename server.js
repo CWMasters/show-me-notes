@@ -1,16 +1,19 @@
 const express = require('express');
-const req = require('express/lib/request');
 const fs = require('fs');
-// const uuid = require('uuid');
 const path = require('path')
-const notes = require('./db/db.json');
-
+const addNotes = require('./db/db.json');
 const PORT = process.env.PORT || 3004;
 const app = express();
+// const uuid = require('uuid'); ????
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static('public'));
+
+app.get('/api/notes', (req, res) => {
+    // removes undefined
+    res.json(addNotes.slice(2));
+});
 
 app.get('/', (req, res ) => {
     res.sendFile(path.join(__dirname, './public/index.html'));
@@ -20,15 +23,9 @@ app.get('/notes', (req, res) => {
     res.sendFile(path.join(__dirname, './public/notes.html'));
 });
 
-app.get('/api/notes', (req, res) => {
-    console.log(notes);
-    res.json(notes);
-});
-
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, './public/index.html'));
 });
-
 
 // function to create notes
 function createAddNote(body, noteArray) {
@@ -45,39 +42,21 @@ function createAddNote(body, noteArray) {
     noteArray.push(addNote);
     fs.writeFileSync(
         path.join(__dirname, './db/db.json'),
+        // add 2 lines for json with null 2 (easier to read)
         JSON.stringify(noteArray, null, 2)
     );
     return addNote;
 };
 
 app.post('/api/notes', (req, res) => {
-    const addNote = createAddNote(req.body, notes);
+    const addNote = createAddNote(req.body, addNotes);
     res.json(addNote);
 });
 
-// function to delete notes
-// function deleteNotes(id, noteArray) {
-//     for (let i = 0; i < noteArray.length; i++) {
-//         let note = noteArray[i];
-
-//         if (note.id == id) {
-//             noteArray.splice(i, 1);
-//             fs.writeFileSync(
-//                 path.join(__dirname, './db/db.json'),
-//                 JSON.stringify(notesArray, null, 2)
-//             );
-
-//             break;
-//         }
-//     }
-// }
-
-
-app.delete('api/notes/:id', (req, res) => {
-    deleteNotes(req.params.id, notes);
-    res.json(true);
-});
-    
+// delete note
+// app.delete('/api/notes/:id', (req, res) => {
+//     deleteNote
+// )};
 
 app.listen(PORT, () => {
   console.log(`API server now on port ${PORT}!`);
