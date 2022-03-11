@@ -1,16 +1,19 @@
 const express = require('express');
-const req = require('express/lib/request');
 const fs = require('fs');
-// const uuid = require('uuid');
 const path = require('path')
-const notes = require('./db/db.json');
-
+const addNotes = require('./db/db.json');
 const PORT = process.env.PORT || 3004;
 const app = express();
+// const req = require('express/lib/request');
+// const uuid = require('uuid');
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static('public'));
+
+app.get('/api/notes', (req, res) => {
+    res.json(addNotes.slice(1));
+});
 
 app.get('/', (req, res ) => {
     res.sendFile(path.join(__dirname, './public/index.html'));
@@ -18,11 +21,6 @@ app.get('/', (req, res ) => {
 
 app.get('/notes', (req, res) => {
     res.sendFile(path.join(__dirname, './public/notes.html'));
-});
-
-app.get('/api/notes', (req, res) => {
-    console.log(notes);
-    res.json(notes);
 });
 
 app.get('*', (req, res) => {
@@ -51,30 +49,29 @@ function createAddNote(body, noteArray) {
 };
 
 app.post('/api/notes', (req, res) => {
-    const addNote = createAddNote(req.body, notes);
+    const addNote = createAddNote(req.body, addNotes);
     res.json(addNote);
 });
 
 // function to delete notes
-// function deleteNotes(id, noteArray) {
-//     for (let i = 0; i < noteArray.length; i++) {
-//         let note = noteArray[i];
+function deleteNotes(id, noteArray) {
+    for (let i = 0; i < noteArray.length; i++) {
+        let note = noteArray[i];
 
-//         if (note.id == id) {
-//             noteArray.splice(i, 1);
-//             fs.writeFileSync(
-//                 path.join(__dirname, './db/db.json'),
-//                 JSON.stringify(notesArray, null, 2)
-//             );
+        if (note.id == id) {
+            noteArray.splice(i, 1);
+            fs.writeFileSync(
+                path.join(__dirname, './db/db.json'),
+                JSON.stringify(noteArray, null, 2)
+            );
 
-//             break;
-//         }
-//     }
-// }
-
+            break;
+        }
+    }
+}
 
 app.delete('api/notes/:id', (req, res) => {
-    deleteNotes(req.params.id, notes);
+    deleteNotes(req.params.id, addNotes);
     res.json(true);
 });
     
