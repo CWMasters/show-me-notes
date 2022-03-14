@@ -4,14 +4,35 @@ const path = require('path')
 const addNotes = require('./db/db.json');
 const PORT = process.env.PORT || 3004;
 const app = express();
-// const uuid = require('uuid'); ????
-
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static('public'));
 
+// function to create notes
+function createAddNote(body, noteArray) {
+    const addNote = body;
+    // prevent overide of new notes (adds to array)
+    if (!Array.isArray(noteArray))
+    noteArray = [0];
+    if (noteArray.length == 0)
+    noteArray.push(0);
+    // adds id to note/body starting at 0
+    body.id = noteArray[0];
+    noteArray[0]++;
+    // pushed note to db.json
+    noteArray.push(addNote);
+    fs.writeFileSync(
+        path.join(__dirname, './db/db.json'),
+        // populate json as 2 lines   
+        JSON.stringify(noteArray)
+    );
+    // returns new note
+    return addNote;
+};
+
+//review zookeepr
 app.get('/api/notes', (req, res) => {
-    // removes undefined
+    // removes undefined note thats populating
     res.json(addNotes.slice(2));
 });
 
@@ -27,33 +48,14 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, './public/index.html'));
 });
 
-// function to create notes
-function createAddNote(body, noteArray) {
-    const addNote = body;
-    if (!Array.isArray(noteArray))
-    noteArray = [];
-
-    if (noteArray.length === 0)
-    noteArray.push(0);
-
-    body.id = noteArray[0];
-    noteArray[0]++;
-
-    noteArray.push(addNote);
-    fs.writeFileSync(
-        path.join(__dirname, './db/db.json'),
-        // add 2 lines for json with null 2 (easier to read)
-        JSON.stringify(noteArray, null, 2)
-    );
-    return addNote;
-};
-
+// post app to html
 app.post('/api/notes', (req, res) => {
     const addNote = createAddNote(req.body, addNotes);
     res.json(addNote);
 });
 
-// delete note
+
+// delete note see assets/index.js
 // app.delete('/api/notes/:id', (req, res) => {
 //     deleteNote
 // )};
