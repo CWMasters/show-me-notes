@@ -9,7 +9,7 @@ An app to allow the user to create notes for tasks they need to complete.
 * JavaScript
 * Express
 
-## Website URL
+## Deployed Application
 https://fast-dusk-71134.herokuapp.com/
 
 ## Screenshot
